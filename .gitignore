@@ -9,5 +9,14 @@ wheels/
 # Virtual environments
 .venv
 
+# System files
+.DS_Store
+
+# Python version files
+.python-version
+
+# Package manager lock files
+uv.lock
+
 # Documentation
 PUBLISHING.md
