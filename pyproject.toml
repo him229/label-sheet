@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "label-sheet"
+version = "0.1.0"
+description = "Generate label sheets for UPS 4-quadrant letter-size sheets from PDFs and images"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+keywords = ["pdf", "label", "ups", "shipping", "quadrant", "print", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pdf2image>=1.17.0",
+    "pillow>=12.0.0",
+    "pyyaml>=6.0.3",
+    "reportlab>=4.4.4",
+    "rich>=14.2.0",
+    "typer>=0.20.0",
+]
+
+[project.scripts]
+label-sheet = "cli:app"
+
+[tool.setuptools]
+py-modules = [
+    "cli",
+    "config",
+    "core",
+    "layout",
+    "processor",
+    "convert_pdf",
+    "main",
+]
