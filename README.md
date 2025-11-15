@@ -15,50 +15,43 @@ A CLI tool to generate label sheets for UPS 4-quadrant letter-size sheets. Trans
 
 ### Prerequisites
 
-- Python 3.8+
-- [uv](https://docs.astral.sh/uv/) package manager
+- Python 3.12+
 - Poppler (for PDF processing)
 
-### Setup
+### Install from PyPI (Recommended)
 
-1. **Install uv** (if not already installed):
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
+Once published, install with:
 
-2. **Install Poppler** (required for PDF processing):
-   ```bash
-   brew install poppler
-   ```
+```bash
+pip install label-sheet
+```
 
-3. **Clone and setup the project**:
-   ```bash
-   mkdir label-sheet
-   cd label-sheet
-   
-   # Initialize project
-   uv init
-   
-   # Add dependencies
-   uv add pdf2image pillow reportlab typer rich pyyaml
-   ```
+### Install Poppler
 
-4. **Copy the source files** into your project:
-   ```
-   label-sheet/
-   ├── core/
-   │   ├── __init__.py
-   │   ├── input_handler.py
-   │   ├── processor.py
-   │   ├── layout.py
-   │   └── config.py
-   └── cli.py
-   ```
+**macOS:**
+```bash
+brew install poppler
+```
 
-5. **Create `core/__init__.py`**:
-   ```python
-   # Empty file to make core a package
-   ```
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get install poppler-utils
+```
+
+**Linux (Fedora):**
+```bash
+sudo dnf install poppler-utils
+```
+
+### Development Installation
+
+For development, clone the repository and install in editable mode:
+
+```bash
+git clone https://github.com/him229/label-sheet.git
+cd label-sheet
+pip install -e .
+```
 
 ## Quick Start
 
@@ -66,26 +59,29 @@ A CLI tool to generate label sheets for UPS 4-quadrant letter-size sheets. Trans
 
 ```bash
 # Use a preset with your input file
-uv run python cli.py input.pdf --preset shipping-label-with-notes
+label-sheet generate input.pdf --preset standard
 
 # Files in ~/Downloads/ can be referenced by name only
-uv run python cli.py my-label.pdf --preset label-only
+label-sheet generate my-label.pdf --preset label-only-q1-q2
 
 # Custom output location
-uv run python cli.py input.pdf --preset label-only -o custom-output.pdf
+label-sheet generate input.pdf --preset label-only-q1-q2 -o custom-output.pdf
+
+# Interactive mode - prompts for input file
+label-sheet generate --preset standard --interactive
 ```
 
 ### Manual Quadrant Configuration
 
 ```bash
 # Specify individual quadrants
-uv run python cli.py \
+label-sheet generate \
   --q1 label.pdf:last:0 \
   --q2 label.pdf:last:0 \
   --q3 notes.pdf:second-last:-90
 
 # Mix images and PDFs
-uv run python cli.py \
+label-sheet generate \
   --q1 shipping-label.jpg \
   --q3 notes.pdf:1:90
 ```
@@ -94,19 +90,19 @@ uv run python cli.py \
 
 ```bash
 # Use preset but override one quadrant
-uv run python cli.py input.pdf \
-  --preset label-only \
+label-sheet generate input.pdf \
+  --preset label-only-q1-q2 \
   --q3 additional-notes.pdf:1:-90
 ```
 
 ## Command Reference
 
-### `generate` (default command)
+### `generate`
 
 Generate a label sheet PDF.
 
 ```bash
-uv run python cli.py [INPUT_FILE] [OPTIONS]
+label-sheet generate [INPUT_FILE] [OPTIONS]
 ```
 
 #### Arguments
@@ -151,18 +147,18 @@ uv run python cli.py [INPUT_FILE] [OPTIONS]
 List all available presets.
 
 ```bash
-uv run python cli.py presets
+label-sheet presets
 ```
 
 ## Built-in Presets
 
-### `shipping-label-with-notes`
-UPS label in Q1 and Q2, notes in Q3 (rotated -90°)
+### `standard`
+UPS label (Q1, Q2) + notes (Q3 rotated -90°)
 
 **Use case:** Most common shipping workflow
 
 ```bash
-uv run python cli.py input.pdf --preset shipping-label-with-notes
+label-sheet generate input.pdf --preset standard
 ```
 
 **Quadrants:**
@@ -170,13 +166,13 @@ uv run python cli.py input.pdf --preset shipping-label-with-notes
 - Q2: Last page (label, duplicate)
 - Q3: Second-to-last page (notes, rotated -90°)
 
-### `label-only`
+### `label-only-q1-q2`
 Just the shipping label in Q1 and Q2
 
 **Use case:** Print labels without notes
 
 ```bash
-uv run python cli.py input.pdf --preset label-only
+label-sheet generate input.pdf --preset label-only-q1-q2
 ```
 
 **Quadrants:**
@@ -189,7 +185,7 @@ Notes in bottom-right quadrant
 **Use case:** Print notes to an unused quadrant
 
 ```bash
-uv run python cli.py input.pdf --preset notes-q4
+label-sheet generate input.pdf --preset notes-q4
 ```
 
 **Quadrants:**
@@ -201,7 +197,7 @@ Notes in bottom-left quadrant, rotated -90°
 **Use case:** Print rotated notes to Q3
 
 ```bash
-uv run python cli.py input.pdf --preset notes-q3
+label-sheet generate input.pdf --preset notes-q3
 ```
 
 **Quadrants:**
@@ -212,19 +208,19 @@ uv run python cli.py input.pdf --preset notes-q3
 ### Example 1: Standard Shipping Workflow
 ```bash
 # Your PDF has a label (last page) and notes (second-to-last page)
-uv run python cli.py shipping-123.pdf --preset shipping-label-with-notes
+label-sheet generate shipping-123.pdf --preset standard
 ```
 
 ### Example 2: Only Print Labels
 ```bash
 # Only need the label, not the notes
-uv run python cli.py label.pdf --preset label-only
+label-sheet generate label.pdf --preset label-only-q1-q2
 ```
 
 ### Example 3: Custom Layout
 ```bash
 # Different files for different quadrants
-uv run python cli.py \
+label-sheet generate \
   --q1 label.jpg \
   --q2 label.jpg \
   --q4 instructions.pdf:1:0 \
@@ -234,15 +230,15 @@ uv run python cli.py \
 ### Example 4: Preset with Override
 ```bash
 # Use preset but add custom content to Q4
-uv run python cli.py input.pdf \
-  --preset label-only \
+label-sheet generate input.pdf \
+  --preset label-only-q1-q2 \
   --q4 extra-info.pdf:1:0
 ```
 
 ### Example 5: Rotate Content
 ```bash
 # Rotate label 180 degrees
-uv run python cli.py \
+label-sheet generate \
   --q1 label.pdf:last:180 \
   --q2 label.pdf:last:180
 ```
@@ -250,7 +246,7 @@ uv run python cli.py \
 ### Example 6: Work with Images
 ```bash
 # Use image files directly
-uv run python cli.py \
+label-sheet generate \
   --q1 photo-label.jpg \
   --q3 barcode.png
 ```
@@ -264,8 +260,8 @@ The CLI automatically looks for files in `~/Downloads/` if:
 **Example:**
 ```bash
 # These are equivalent if the file is in Downloads
-uv run python cli.py label.pdf --preset label-only
-uv run python cli.py ~/Downloads/label.pdf --preset label-only
+label-sheet generate label.pdf --preset label-only-q1-q2
+label-sheet generate ~/Downloads/label.pdf --preset label-only-q1-q2
 ```
 
 ## Quadrant Layout
@@ -355,13 +351,11 @@ defaults:
 ### Project Structure
 ```
 label-sheet/
-├── core/
-│   ├── __init__.py
-│   ├── input_handler.py    # PDF/image loading
-│   ├── processor.py         # Image transformations
-│   ├── layout.py           # Quadrant layout engine
-│   └── config.py           # Configuration & presets
 ├── cli.py                  # CLI interface
+├── config.py               # Configuration & presets
+├── core.py                 # PDF/image loading
+├── layout.py               # Quadrant layout engine
+├── processor.py            # Image transformations
 ├── pyproject.toml          # Project dependencies
 └── README.md              # This file
 ```
@@ -369,14 +363,15 @@ label-sheet/
 ### Running Tests
 ```bash
 # Test basic functionality
-uv run python cli.py test-input.pdf --preset label-only
+label-sheet generate test-input.pdf --preset label-only-q1-q2
 
 # Test with verbose output
-uv run python cli.py --help
+label-sheet --help
+label-sheet generate --help
 ```
 
 ### Adding New Presets
-Edit `core/config.py` and add to `BUILTIN_PRESETS` dictionary.
+Edit `config.py` and add to `BUILTIN_PRESETS` dictionary.
 
 ## License
 
